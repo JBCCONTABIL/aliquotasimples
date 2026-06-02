@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calculadora Simples Nacional — JBC Contabilidade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet" />
+<style>
+  /* ── Tokens JBC ─────────────────────────────────────────────────── */
+  :root {
+    --brand-01: #990024;
+    --brand-02: #CC143F;
+    --brand-03: #FF003C;
+
+    --dark-3:   #2B2E33;
+    --dark-2:   #565B66;
+    --dark-1:   #6B768A;
+
+    --mid-grey: #D6D6D6;
+    --light-3:  #EFEFEF;
+    --light-2:  #F5F5F5;
+    --light-1:  #F9F9F9;
+    --white:    #FFFFFF;
+
+    --positive: #008542;
+    --warning:  #E58A00;
+    --negative: #CC2200;
+    --info:     #295FCC;
+
+    --font: 'Lato', Arial, sans-serif;
+
+    /* Carbon grid */
+    --grid-gutter: 16px;
+    --grid-margin-sm: 16px;
+    --grid-margin-md: 32px;
+    --grid-margin-lg: 48px;
+
+    --radius-sm: 2px;
+    --radius-md: 4px;
+
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  /* ── Reset ──────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--dark-3);
+    background: var(--light-2);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────── */
+  .header {
+    background: var(--white);
+    border-bottom: 1px solid var(--mid-grey);
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--grid-margin-md);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .header-logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--brand-01);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+  }
+
+  .header-logo-mark span {
+    font-family: var(--font);
+    font-weight: 900;
+    font-size: 13px;
+    color: var(--white);
+    letter-spacing: -0.5px;
+  }
+
+  .header-logo-text {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--dark-3);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--mid-grey);
+    margin: 0 12px;
+  }
+
+  .header-module {
+    font-size: 12px;
+    color: var(--dark-1);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────────────── */
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px var(--grid-margin-md) 80px;
+  }
+
+  /* ── Page header ─────────────────────────────────────────────────── */
+  .page-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--mid-grey);
+  }
+
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-01);
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--dark-3);
+    line-height: 1.2;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .page-title strong {
+    font-weight: 700;
+  }
+
+  .page-desc {
+    font-size: 13px;
+    color: var(--dark-1);
+    line-height: 1.5;
+  }
+
+  /* ── Form card ──────────────────────────────────────────────────── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--mid-grey);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-section {
+    padding: 24px;
+    border-bottom: 1px solid var(--light-3);
+  }
+
+  .card-section:last-child {
+    border-bottom: none;
+  }
+
+  .card-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dark-1);
+    margin-bottom: 20px;
+  }
+
+  /* ── Form elements ──────────────────────────────────────────────── */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--grid-gutter);
+    margin-bottom: 16px;
+  }
+
+  .form-row.single {
+    grid-template-columns: 1fr;
+    max-width: 50%;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dark-2);
+    letter-spacing: 0.02em;
+  }
+
+  .field label .required {
+    color: var(--brand-01);
+    margin-left: 2px;
+  }
+
+  .field input,
+  .field select {
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--dark-3);
+    background: var(--light-1);
+    border: none;
+    border-bottom: 2px solid var(--mid-grey);
+    border-radius: 0;
+    padding: 10px 12px;
+    height: 40px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B768A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-bottom-color: var(--brand-01);
+    background: var(--white);
+  }
+
+  .field input::placeholder {
+    color: var(--dark-1);
+  }
+
+  .field-helper {
+    font-size: 11px;
+    color: var(--dark-1);
+    line-height: 1.4;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: var(--negative);
+    display: none;
+  }
+
+  .field.has-error input,
+  .field.has-error select {
+    border-bottom-color: var(--negative);
+  }
+
+  .field.has-error .field-error {
+    display: block;
+  }
+
+  /* ── Folha condicional ──────────────────────────────────────────── */
+  #bloco-folha {
+    display: none;
+    overflow: hidden;
+    transition: max-height 0.2s ease;
+  }
+
+  #bloco-folha.visible {
+    display: block;
+  }
+
+  /* ── CTA ────────────────────────────────────────────────────────── */
+  .btn-primary {
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--white);
+    background: var(--brand-01);
+    border: none;
+    padding: 0 32px;
+    height: 48px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+    width: 100%;
+  }
+
+  .btn-primary:hover { background: var(--brand-02); }
+  .btn-primary:active { background: var(--brand-03); transform: translateY(1px); }
+
+  /* ── Alertas ────────────────────────────────────────────────────── */
+  .alert {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .alert-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+  }
+
+  .alert-info {
+    background: #EEF3FB;
+    color: var(--info);
+    border-left: 3px solid var(--info);
+  }
+
+  .alert-warning {
+    background: #FEF6E7;
+    color: var(--warning);
+    border-left: 3px solid var(--warning);
+  }
+
+  .alert-error {
+    background: #FDECEA;
+    color: var(--negative);
+    border-left: 3px solid var(--negative);
+  }
+
+  /* ── Resultado ──────────────────────────────────────────────────── */
+  #resultado { display: none; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .faixa-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--light-3);
+    border: 1px solid var(--mid-grey);
+    color: var(--dark-2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  .faixa-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand-01);
+    flex-shrink: 0;
+  }
+
+  /* ── Metric cards ───────────────────────────────────────────────── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--grid-gutter);
+    margin-bottom: 24px;
+  }
+
+  .metric {
+    background: var(--white);
+    border: 1px solid var(--mid-grey);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .metric.highlight {
+    border-color: var(--brand-01);
+    border-top: 3px solid var(--brand-01);
+  }
+
+  .metric-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dark-1);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .metric-value {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--dark-3);
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+
+  .metric.highlight .metric-value {
+    color: var(--brand-01);
+    font-weight: 700;
+  }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--dark-1);
+    margin-top: 4px;
+  }
+
+  /* ── Tabela de repartição ───────────────────────────────────────── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dark-1);
+    margin-bottom: 12px;
+  }
+
+  .table-wrapper {
+    border: 1px solid var(--mid-grey);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    table-layout: fixed;
+  }
+
+  thead tr {
+    background: var(--light-3);
+  }
+
+  th {
+    padding: 10px 16px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dark-1);
+    border-bottom: 1px solid var(--mid-grey);
+  }
+
+  th:first-child { text-align: left; width: 28%; }
+
+  td {
+    padding: 10px 16px;
+    text-align: right;
+    color: var(--dark-2);
+    border-bottom: 1px solid var(--light-3);
+  }
+
+  td:first-child {
+    text-align: left;
+    color: var(--dark-3);
+    font-weight: 400;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover { background: var(--light-2); }
+
+  tbody tr.row-iss td {
+    color: var(--brand-01);
+    font-weight: 700;
+    background: #FFF5F7;
+  }
+
+  tbody tr.row-iss td:first-child { color: var(--brand-01); }
+
+  tbody tr.row-total td {
+    font-weight: 700;
+    color: var(--dark-3);
+    background: var(--light-3);
+    border-top: 1px solid var(--mid-grey);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Fator r ────────────────────────────────────────────────────── */
+  .fator-r-info {
+    font-size: 12px;
+    color: var(--dark-1);
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: var(--light-3);
+    border-radius: var(--radius-sm);
+    display: none;
+  }
+
+  /* ── Responsivo ─────────────────────────────────────────────────── */
+  @media (max-width: 671px) {
+    .page {
+      padding: 24px var(--grid-margin-sm) 60px;
+    }
+
+    .header {
+      padding: 0 var(--grid-margin-sm);
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .form-row.single {
+      max-width: 100%;
+    }
+
+    .metrics-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-title {
+      font-size: 20px;
+    }
+
+    th, td {
+      padding: 9px 10px;
+      font-size: 12px;
+    }
+
+    .metric-value {
+      font-size: 24px;
+    }
+  }
+
+  @media (min-width: 672px) and (max-width: 1055px) {
+    .page {
+      padding: 32px var(--grid-margin-md) 80px;
+    }
+  }
+
+  /* ── Animação resultado ─────────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: fadeUp 0.22s ease forwards;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" role="banner">
+  <a class="header-logo" href="#" aria-label="JBC Contabilidade">
+    <div class="header-logo-mark" aria-hidden="true">
+      <span>JBC</span>
+    </div>
+    <span class="header-logo-text">JBC Contabilidade</span>
+  </a>
+  <div class="header-divider" aria-hidden="true"></div>
+  <span class="header-module">Micro Sistemas</span>
+</header>
+
+<!-- Conteúdo -->
+<main class="page" role="main">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <p class="page-eyebrow">Sistema 01</p>
+    <h1 class="page-title"><strong>Calculadora</strong> Simples Nacional</h1>
+    <p class="page-desc">Apure a alíquota efetiva e o ISS a destacar na nota fiscal. Anexos III, IV e V — com migração automática pelo fator r.</p>
+  </div>
+
+  <!-- Formulário -->
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="card-section">
+      <p class="card-section-title">Dados da empresa</p>
+
+      <div class="form-row">
+        <div class="field" id="field-anexo">
+          <label for="anexo">Anexo <span class="required" aria-hidden="true">*</span></label>
+          <select id="anexo" name="anexo" onchange="onAnexoChange()" aria-required="true">
+            <option value="3">Anexo III — Serviços (geral)</option>
+            <option value="4">Anexo IV — Serviços com cessão de mão de obra</option>
+            <option value="5">Anexo V — Serviços profissionais (§5º-I)</option>
+          </select>
+          <span class="field-error" role="alert"></span>
+        </div>
+
+        <div class="field" id="field-rbt12">
+          <label for="rbt12">RBT12 — receita bruta 12 meses <span class="required" aria-hidden="true">*</span></label>
+          <input type="number" id="rbt12" name="rbt12" placeholder="Ex: 350000" min="0" max="4800000" step="0.01" aria-required="true" />
+          <span class="field-helper">Receita bruta acumulada dos últimos 12 meses (R$)</span>
+          <span class="field-error" role="alert"></span>
+        </div>
+      </div>
+
+      <div id="bloco-folha" role="region" aria-label="Campo necessário para Anexo V">
+        <div class="form-row single">
+          <div class="field" id="field-folha">
+            <label for="folha">Folha de salários — 12 meses <span class="required" aria-hidden="true">*</span></label>
+            <input type="number" id="folha" name="folha" placeholder="Ex: 80000" min="0" step="0.01" />
+            <span class="field-helper">Necessária para calcular o fator r (Anexo V)</span>
+            <span class="field-error" role="alert"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-section">
+      <button class="btn-primary" onclick="calcular()" aria-label="Calcular alíquotas do Simples Nacional">
+        Calcular alíquotas
+      </button>
+    </div>
+  </div>
+
+  <!-- Resultado -->
+  <div id="resultado" role="region" aria-label="Resultado do cálculo" aria-live="polite">
+
+    <div id="alert-migrou" class="alert alert-info" style="display:none;" role="alert">
+      <svg class="alert-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M8 5v4M8 11v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span id="alert-migrou-text"></span>
+    </div>
+
+    <div id="alert-cap" class="alert alert-warning" style="display:none;" role="alert">
+      <svg class="alert-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M8 2L14.5 13H1.5L8 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M8 6.5v3M8 11v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span>ISS limitado a 5% — cap da 5ª faixa aplicado. Excedente redistribuído proporcionalmente aos tributos federais (LC 123/2006).</span>
+    </div>
+
+    <div class="result-header">
+      <div class="faixa-badge">
+        <span class="faixa-badge-dot" aria-hidden="true"></span>
+        <span id="faixa-badge-text"></span>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric">
+        <p class="metric-label">Alíquota efetiva total</p>
+        <p class="metric-value" id="val-total">—</p>
+        <p class="metric-sub" id="val-aliq-nominal"></p>
+      </div>
+      <div class="metric highlight">
+        <p class="metric-label">ISS efetivo (destacar na NF)</p>
+        <p class="metric-value" id="val-iss">—</p>
+        <p class="metric-sub">componente isolado</p>
+      </div>
+      <div class="metric">
+        <p class="metric-label">ISS sobre R$ 1.000,00</p>
+        <p class="metric-value" id="val-iss-1k">—</p>
+        <p class="metric-sub">referência operacional</p>
+      </div>
+    </div>
+
+    <p class="section-label">Repartição por tributo</p>
+    <div class="table-wrapper">
+      <table aria-label="Repartição da alíquota por tributo">
+        <thead>
+          <tr>
+            <th scope="col">Tributo</th>
+            <th scope="col">% nominal (faixa)</th>
+            <th scope="col">% efetivo</th>
+            <th scope="col">R$ / R$ 1.000</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+
+    <p id="fator-r-info" class="fator-r-info" aria-live="polite"></p>
+
+  </div><!-- /resultado -->
+
+</main>
+
+<script>
+/* ── Tabelas ──────────────────────────────────────────────────────── */
+const ANEXOS = {
+  3: {
+    nome: "Anexo III",
+    faixas: [
+      { ate: 180000,   aliq: 0.06,  pd: 0      },
+      { ate: 360000,   aliq: 0.112, pd: 9360   },
+      { ate: 720000,   aliq: 0.135, pd: 17640  },
+      { ate: 1800000,  aliq: 0.16,  pd: 35640  },
+      { ate: 3600000,  aliq: 0.21,  pd: 125640 },
+      { ate: 4800000,  aliq: 0.33,  pd: 648000 },
+    ],
+    tributos: ["IRPJ","CSLL","Cofins","PIS/Pasep","CPP","ISS"],
+    issIdx: 5,
+    pct: [
+      [0.04,  0.035, 0.1282, 0.0278, 0.434,  0.335],
+      [0.04,  0.035, 0.1405, 0.0305, 0.434,  0.32 ],
+      [0.04,  0.035, 0.1364, 0.0296, 0.434,  0.325],
+      [0.04,  0.035, 0.1364, 0.0296, 0.434,  0.325],
+      [0.04,  0.035, 0.1282, 0.0278, 0.434,  0.335],
+      [0.35,  0.15,  0.1603, 0.0347, 0.305,  0.0  ],
+    ],
+    capISS5pct: { faixa: 4, limiteAliqEfetiva: 0.1492537 },
+  },
+  4: {
+    nome: "Anexo IV",
+    faixas: [
+      { ate: 180000,   aliq: 0.045, pd: 0      },
+      { ate: 360000,   aliq: 0.09,  pd: 8100   },
+      { ate: 720000,   aliq: 0.102, pd: 12420  },
+      { ate: 1800000,  aliq: 0.14,  pd: 39780  },
+      { ate: 3600000,  aliq: 0.22,  pd: 183780 },
+      { ate: 4800000,  aliq: 0.33,  pd: 828000 },
+    ],
+    tributos: ["IRPJ","CSLL","Cofins","PIS/Pasep","ISS"],
+    issIdx: 4,
+    pct: [
+      [0.188, 0.152, 0.1767, 0.0383, 0.445],
+      [0.198, 0.152, 0.2055, 0.0445, 0.4  ],
+      [0.208, 0.152, 0.1973, 0.0427, 0.4  ],
+      [0.178, 0.192, 0.189,  0.041,  0.4  ],
+      [0.188, 0.192, 0.1808, 0.0392, 0.4  ],
+      [0.535, 0.215, 0.2055, 0.0445, 0.0  ],
+    ],
+    capISS5pct: { faixa: 4, limiteAliqEfetiva: 0.125 },
+  },
+  5: {
+    nome: "Anexo V",
+    faixas: [
+      { ate: 180000,   aliq: 0.155, pd: 0      },
+      { ate: 360000,   aliq: 0.18,  pd: 4500   },
+      { ate: 720000,   aliq: 0.195, pd: 9900   },
+      { ate: 1800000,  aliq: 0.205, pd: 17100  },
+      { ate: 3600000,  aliq: 0.23,  pd: 62100  },
+      { ate: 4800000,  aliq: 0.305, pd: 540000 },
+    ],
+    tributos: ["IRPJ","CSLL","Cofins","PIS/Pasep","CPP","ISS"],
+    issIdx: 5,
+    pct: [
+      [0.25,  0.15,  0.141,  0.0305, 0.2885, 0.14 ],
+      [0.23,  0.15,  0.141,  0.0305, 0.2785, 0.17 ],
+      [0.24,  0.15,  0.1492, 0.0323, 0.2385, 0.19 ],
+      [0.21,  0.15,  0.1574, 0.0341, 0.2385, 0.21 ],
+      [0.23,  0.125, 0.141,  0.0305, 0.2385, 0.235],
+      [0.35,  0.155, 0.1644, 0.0356, 0.295,  0.0  ],
+    ],
+  },
+};
+
+/* ── Helpers ──────────────────────────────────────────────────────── */
+function fmtPct(n, dec) {
+  return (n * 100).toFixed(dec !== undefined ? dec : 4) + '%';
+}
+
+function fmtBRL(n) {
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function fmtBRLsimple(n) {
+  return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function setFieldError(fieldId, msg) {
+  const wrap = document.getElementById(fieldId);
+  const errEl = wrap.querySelector('.field-error');
+  if (msg) {
+    wrap.classList.add('has-error');
+    errEl.textContent = msg;
+  } else {
+    wrap.classList.remove('has-error');
+    errEl.textContent = '';
+  }
+}
+
+function clearErrors() {
+  ['field-anexo','field-rbt12','field-folha'].forEach(id => setFieldError(id, ''));
+}
+
+/* ── Evento: troca de anexo ───────────────────────────────────────── */
+function onAnexoChange() {
+  const v = document.getElementById('anexo').value;
+  const bloco = document.getElementById('bloco-folha');
+  if (v === '5') {
+    bloco.classList.add('visible');
+  } else {
+    bloco.classList.remove('visible');
+  }
+  document.getElementById('resultado').style.display = 'none';
+  clearErrors();
+}
+
+/* ── Cálculo principal ───────────────────────────────────────────── */
+function calcular() {
+  clearErrors();
+
+  const rbt12Raw = document.getElementById('rbt12').value;
+  const rbt12    = parseFloat(rbt12Raw);
+  const anexoSel = parseInt(document.getElementById('anexo').value);
+  let hasError   = false;
+
+  if (!rbt12Raw || isNaN(rbt12) || rbt12 <= 0) {
+    setFieldError('field-rbt12', 'Informe a receita bruta dos últimos 12 meses.');
+    hasError = true;
+  } else if (rbt12 > 4800000) {
+    setFieldError('field-rbt12', 'RBT12 acima de R$ 4.800.000 — empresa fora do Simples Nacional.');
+    hasError = true;
+  }
+
+  let fatorR = null;
+  if (anexoSel === 5) {
+    const folhaRaw = document.getElementById('folha').value;
+    const folha    = parseFloat(folhaRaw);
+    if (!folhaRaw || isNaN(folha) || folha <= 0) {
+      setFieldError('field-folha', 'Informe a folha de salários acumulada dos últimos 12 meses.');
+      hasError = true;
+    } else {
+      fatorR = folha / rbt12;
+    }
+  }
+
+  if (hasError) return;
+
+  /* Decide qual anexo usar */
+  let anexoUsado   = anexoSel;
+  let migrouIII    = false;
+
+  if (anexoSel === 5 && fatorR >= 0.28) {
+    anexoUsado = 3;
+    migrouIII  = true;
+  }
+
+  const tab = ANEXOS[anexoUsado];
+
+  /* Localiza faixa */
+  let faixaIdx = tab.faixas.findIndex(f => rbt12 <= f.ate);
+  if (faixaIdx === -1) faixaIdx = tab.faixas.length - 1;
+
+  const faixa  = tab.faixas[faixaIdx];
+  const aliqEf = (rbt12 * faixa.aliq - faixa.pd) / rbt12;
+
+  /* Percentuais efetivos — cópia para manipular o cap */
+  let pctFaixa   = [...tab.pct[faixaIdx]];
+  let capAplicado = false;
+
+  if (tab.capISS5pct && faixaIdx === tab.capISS5pct.faixa && aliqEf > tab.capISS5pct.limiteAliqEfetiva) {
+    capAplicado = true;
+    const issFixo    = 0.05;
+    const excesso    = aliqEf - issFixo;
+    const somaFed    = pctFaixa.reduce((acc, p, i) => i !== tab.issIdx ? acc + p : acc, 0);
+    pctFaixa = pctFaixa.map((p, i) =>
+      i === tab.issIdx
+        ? issFixo / aliqEf
+        : (excesso * (p / somaFed)) / aliqEf
+    );
+  }
+
+  const issEfetivo = aliqEf * pctFaixa[tab.issIdx];
+
+  /* ── Preenche UI ─────────────────────────────────────────────── */
+
+  /* Alertas */
+  const alertMigrou = document.getElementById('alert-migrou');
+  if (migrouIII) {
+    alertMigrou.style.display = 'flex';
+    document.getElementById('alert-migrou-text').textContent =
+      'Fator r = ' + (fatorR * 100).toFixed(2) + '% (≥ 28%) — cálculo realizado pelo Anexo III conforme LC 123/2006.';
+  } else {
+    alertMigrou.style.display = 'none';
+  }
+
+  document.getElementById('alert-cap').style.display = capAplicado ? 'flex' : 'none';
+
+  /* Badge de faixa */
+  const faixaNome = tab.nome + (migrouIII ? ' (migrado)' : '');
+  const faixaLimite = faixa.ate.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  document.getElementById('faixa-badge-text').textContent =
+    faixaNome + ' · ' + (faixaIdx + 1) + 'ª faixa · até ' + faixaLimite;
+
+  /* Métricas */
+  document.getElementById('val-total').textContent    = fmtPct(aliqEf, 4);
+  document.getElementById('val-aliq-nominal').textContent =
+    'nominal ' + fmtPct(faixa.aliq, 1) + ' · PD ' + fmtBRLsimple(faixa.pd);
+  document.getElementById('val-iss').textContent      = fmtPct(issEfetivo, 4);
+  document.getElementById('val-iss-1k').textContent   = fmtBRLsimple(issEfetivo * 1000);
+
+  /* Tabela */
+  const tbody = document.getElementById('tbl-body');
+  tbody.innerHTML = '';
+
+  tab.tributos.forEach((nome, i) => {
+    const nominalPct = tab.pct[faixaIdx][i];
+    const efetivo    = aliqEf * pctFaixa[i];
+    const tr         = document.createElement('tr');
+    if (i === tab.issIdx) tr.className = 'row-iss';
+    tr.innerHTML =
+      '<td>' + nome + '</td>' +
+      '<td>' + (nominalPct * 100).toFixed(2) + '%</td>' +
+      '<td>' + fmtPct(efetivo, 4) + '</td>' +
+      '<td>' + fmtBRLsimple(efetivo * 1000) + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  const trTot = document.createElement('tr');
+  trTot.className = 'row-total';
+  trTot.innerHTML =
+    '<td>Total</td><td>100,00%</td><td>' + fmtPct(aliqEf, 4) + '</td><td>' + fmtBRLsimple(aliqEf * 1000) + '</td>';
+  tbody.appendChild(trTot);
+
+  /* Fator r */
+  const frEl = document.getElementById('fator-r-info');
+  if (anexoSel === 5 && fatorR !== null) {
+    frEl.style.display = 'block';
+    frEl.textContent = 'Fator r calculado: ' + (fatorR * 100).toFixed(2) + '%' +
+      (migrouIII ? ' — migrou para Anexo III (r ≥ 28%)' : ' — permanece no Anexo V (r < 28%)');
+  } else {
+    frEl.style.display = 'none';
+  }
+
+  /* Exibe resultado com animação */
+  const resEl = document.getElementById('resultado');
+  resEl.style.display = 'block';
+  resEl.classList.remove('animate-in');
+  void resEl.offsetWidth;
+  resEl.classList.add('animate-in');
+
+  /* Scroll suave até resultado em mobile */
+  resEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ── Enter para calcular ─────────────────────────────────────────── */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') calcular();
+});
+</script>
+</body>
+</html>
