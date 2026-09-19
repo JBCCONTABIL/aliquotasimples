@@ -551,6 +551,65 @@
     }
   }
 
+  /* ── Seção de apuração do DAS ───────────────────────────────────── */
+  #bloco-apuracao { display: none; margin-top: 24px; }
+
+  .apuracao-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--grid-gutter);
+    margin-bottom: 0;
+  }
+
+  .apuracao-result {
+    margin-top: 24px;
+  }
+
+  .das-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--grid-gutter);
+    margin-bottom: 16px;
+  }
+
+  .das-card {
+    background: var(--white);
+    border: 1px solid var(--mid-grey);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .das-card.das-total {
+    border-color: var(--positive);
+    border-top: 3px solid var(--positive);
+  }
+
+  .das-card .metric-label { margin-bottom: 8px; }
+
+  .das-card .metric-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark-3);
+  }
+
+  .das-card.das-total .metric-value {
+    color: var(--positive);
+  }
+
+  .das-card .metric-sub { margin-top: 4px; }
+
+  .das-table-wrapper {
+    border: 1px solid var(--mid-grey);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  @media (max-width: 671px) {
+    .apuracao-inputs { grid-template-columns: 1fr; }
+    .das-grid { grid-template-columns: 1fr; }
+  }
+
   /* ── Animação resultado ─────────────────────────────────────────── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(8px); }
@@ -645,7 +704,7 @@
         <path d="M8 2L14.5 13H1.5L8 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
         <path d="M8 6.5v3M8 11v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <span>ISS limitado a 5% — cap da 5ª faixa aplicado. Excedente redistribuído proporcionalmente aos tributos federais (LC 123/2006).</span>
+      <span>ISS efetivo de cálculo acima de 5%. Para <strong>destaque/retenção na nota</strong>, o limite é 5% (LC 116). Para o <strong>cálculo do DAS</strong>, usa-se o efetivo real — não os 5% — e é essa proporção que é excluída na receita com ISS retido, conforme o PGDAS-D.</span>
     </div>
 
     <div class="result-header">
@@ -662,14 +721,14 @@
         <p class="metric-sub" id="val-aliq-nominal"></p>
       </div>
       <div class="metric highlight">
-        <p class="metric-label">ISS efetivo (destacar na NF)</p>
-        <p class="metric-value" id="val-iss">—</p>
-        <p class="metric-sub">componente isolado</p>
+        <p class="metric-label">ISS a destacar na NF</p>
+        <p class="metric-value" id="val-iss-destaque">—</p>
+        <p class="metric-sub" id="val-iss-destaque-sub"></p>
       </div>
       <div class="metric">
-        <p class="metric-label">ISS sobre R$ 1.000,00</p>
-        <p class="metric-value" id="val-iss-1k">—</p>
-        <p class="metric-sub">referência operacional</p>
+        <p class="metric-label">ISS efetivo (cálculo)</p>
+        <p class="metric-value" id="val-iss-calc">—</p>
+        <p class="metric-sub" id="val-iss-calc-sub"></p>
       </div>
     </div>
 
@@ -691,6 +750,67 @@
     <p id="fator-r-info" class="fator-r-info" aria-live="polite"></p>
 
   </div><!-- /resultado -->
+
+  <!-- Apuração do DAS -->
+  <div id="bloco-apuracao" role="region" aria-label="Apuração do DAS">
+    <div class="card">
+      <div class="card-section">
+        <p class="card-section-title">Apuração do DAS</p>
+        <p style="font-size:13px;color:var(--dark-1);margin-bottom:20px;line-height:1.5;">
+          Informe a receita do período separada por tipo de retenção. Deixe em branco os que não se aplicam.
+        </p>
+        <div class="apuracao-inputs">
+          <div class="field" id="field-rec-sem-ret">
+            <label for="rec-sem-ret">Receita <strong>sem</strong> ISS retido (R$)</label>
+            <input type="number" id="rec-sem-ret" placeholder="Ex: 20000" min="0" step="0.01"
+              oninput="apurar()" />
+            <span class="field-helper">Aplica alíquota efetiva total</span>
+          </div>
+          <div class="field" id="field-rec-com-ret">
+            <label for="rec-com-ret">Receita <strong>com</strong> ISS retido (R$)</label>
+            <input type="number" id="rec-com-ret" placeholder="Ex: 15000" min="0" step="0.01"
+              oninput="apurar()" />
+            <span class="field-helper">Aplica efetiva − ISS efetivo de cálculo (não o 5% do destaque)</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="apuracao-result" class="card-section" style="display:none;">
+        <div class="das-grid">
+          <div class="das-card">
+            <p class="metric-label">DAS s/ receita sem retenção</p>
+            <p class="metric-value" id="das-sem-ret">—</p>
+            <p class="metric-sub" id="das-sem-ret-sub"></p>
+          </div>
+          <div class="das-card">
+            <p class="metric-label">DAS s/ receita com retenção</p>
+            <p class="metric-value" id="das-com-ret">—</p>
+            <p class="metric-sub" id="das-com-ret-sub"></p>
+          </div>
+          <div class="das-card das-total">
+            <p class="metric-label">DAS total do período</p>
+            <p class="metric-value" id="das-total">—</p>
+            <p class="metric-sub" id="das-total-sub"></p>
+          </div>
+        </div>
+
+        <p class="section-label" style="margin-top:8px;">Detalhamento</p>
+        <div class="das-table-wrapper">
+          <table aria-label="Detalhamento da apuração do DAS">
+            <thead>
+              <tr>
+                <th scope="col" style="width:32%;">Receita</th>
+                <th scope="col">Valor (R$)</th>
+                <th scope="col">Alíquota aplicada</th>
+                <th scope="col">DAS (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="das-tbl-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /bloco-apuracao -->
 
 </main>
 
@@ -717,7 +837,6 @@ const ANEXOS = {
       [0.04,  0.035, 0.1282, 0.0278, 0.434,  0.335],
       [0.35,  0.15,  0.1603, 0.0347, 0.305,  0.0  ],
     ],
-    capISS5pct: { faixa: 4, limiteAliqEfetiva: 0.1492537 },
   },
   4: {
     nome: "Anexo IV",
@@ -739,7 +858,6 @@ const ANEXOS = {
       [0.188, 0.192, 0.1808, 0.0392, 0.4  ],
       [0.535, 0.215, 0.2055, 0.0445, 0.0  ],
     ],
-    capISS5pct: { faixa: 4, limiteAliqEfetiva: 0.125 },
   },
   5: {
     nome: "Anexo V",
@@ -855,23 +973,14 @@ function calcular() {
   const faixa  = tab.faixas[faixaIdx];
   const aliqEf = (rbt12 * faixa.aliq - faixa.pd) / rbt12;
 
-  /* Percentuais efetivos — cópia para manipular o cap */
-  let pctFaixa   = [...tab.pct[faixaIdx]];
-  let capAplicado = false;
-
-  if (tab.capISS5pct && faixaIdx === tab.capISS5pct.faixa && aliqEf > tab.capISS5pct.limiteAliqEfetiva) {
-    capAplicado = true;
-    const issFixo    = 0.05;
-    const excesso    = aliqEf - issFixo;
-    const somaFed    = pctFaixa.reduce((acc, p, i) => i !== tab.issIdx ? acc + p : acc, 0);
-    pctFaixa = pctFaixa.map((p, i) =>
-      i === tab.issIdx
-        ? issFixo / aliqEf
-        : (excesso * (p / somaFed)) / aliqEf
-    );
-  }
-
-  const issEfetivo = aliqEf * pctFaixa[tab.issIdx];
+  /* Percentuais efetivos — sem cap/redistribuição. Cada tributo é
+     faixa% × alíquota efetiva, igual ao PGDAS-D/E-CAC. O ISS é o valor
+     real de cálculo mesmo quando ultrapassa 5% — é essa proporção que
+     sai do DAS na receita com ISS retido. */
+  const pctFaixa    = tab.pct[faixaIdx];
+  const issEfetivo  = aliqEf * pctFaixa[tab.issIdx];
+  const issExcede5  = issEfetivo > 0.05;
+  const issDestaque = Math.min(issEfetivo, 0.05);
 
   /* ── Preenche UI ─────────────────────────────────────────────── */
 
@@ -885,7 +994,7 @@ function calcular() {
     alertMigrou.style.display = 'none';
   }
 
-  document.getElementById('alert-cap').style.display = capAplicado ? 'flex' : 'none';
+  document.getElementById('alert-cap').style.display = issExcede5 ? 'flex' : 'none';
 
   /* Badge de faixa */
   const faixaNome = tab.nome + (migrouIII ? ' (migrado)' : '');
@@ -897,8 +1006,18 @@ function calcular() {
   document.getElementById('val-total').textContent    = fmtPct(aliqEf, 4);
   document.getElementById('val-aliq-nominal').textContent =
     'nominal ' + fmtPct(faixa.aliq, 1) + ' · PD ' + fmtBRLsimple(faixa.pd);
-  document.getElementById('val-iss').textContent      = fmtPct(issEfetivo, 4);
-  document.getElementById('val-iss-1k').textContent   = fmtBRLsimple(issEfetivo * 1000);
+
+  /* ISS a destacar na nota — limitado a 5% (LC 116) */
+  document.getElementById('val-iss-destaque').textContent = fmtPct(issDestaque, 4);
+  document.getElementById('val-iss-destaque-sub').textContent =
+    fmtBRLsimple(issDestaque * 1000) + ' por R$ 1.000' +
+    (issExcede5 ? ' · limite 5% (LC 116)' : '');
+
+  /* ISS efetivo de cálculo — valor real que compõe o DAS */
+  document.getElementById('val-iss-calc').textContent = fmtPct(issEfetivo, 4);
+  document.getElementById('val-iss-calc-sub').textContent = issExcede5
+    ? fmtBRLsimple(issEfetivo * 1000) + ' por R$ 1.000 · usado no DAS'
+    : '= valor a destacar (ISS ≤ 5%)';
 
   /* Tabela */
   const tbody = document.getElementById('tbl-body');
@@ -933,6 +1052,16 @@ function calcular() {
     frEl.style.display = 'none';
   }
 
+  /* Salva estado global para apuração */
+  _aliqEfetiva = aliqEf;
+  _issEfetivo  = issEfetivo;
+
+  /* Limpa campos de apuração ao recalcular */
+  document.getElementById('rec-sem-ret').value = '';
+  document.getElementById('rec-com-ret').value = '';
+  document.getElementById('apuracao-result').style.display = 'none';
+  document.getElementById('bloco-apuracao').style.display = 'block';
+
   /* Exibe resultado com animação */
   const resEl = document.getElementById('resultado');
   resEl.style.display = 'block';
@@ -942,6 +1071,75 @@ function calcular() {
 
   /* Scroll suave até resultado em mobile */
   resEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ── Estado global das alíquotas calculadas ──────────────────────── */
+let _aliqEfetiva = null;
+let _issEfetivo  = null;
+
+/* ── Apuração do DAS ─────────────────────────────────────────────── */
+function apurar() {
+  if (_aliqEfetiva === null) return;
+
+  const semRet = parseFloat(document.getElementById('rec-sem-ret').value) || 0;
+  const comRet = parseFloat(document.getElementById('rec-com-ret').value) || 0;
+
+  if (semRet === 0 && comRet === 0) {
+    document.getElementById('apuracao-result').style.display = 'none';
+    return;
+  }
+
+  const aliqSemRet = _aliqEfetiva;
+  const aliqComRet = _aliqEfetiva - _issEfetivo;
+
+  const dasSemRet = semRet * aliqSemRet;
+  const dasComRet = comRet * aliqComRet;
+  const dasTotal  = dasSemRet + dasComRet;
+
+  document.getElementById('das-sem-ret').textContent     = fmtBRLsimple(dasSemRet);
+  document.getElementById('das-sem-ret-sub').textContent = semRet > 0
+    ? fmtPct(aliqSemRet, 4) + ' × ' + fmtBRLsimple(semRet)
+    : '—';
+
+  document.getElementById('das-com-ret').textContent     = fmtBRLsimple(dasComRet);
+  document.getElementById('das-com-ret-sub').textContent = comRet > 0
+    ? fmtPct(aliqComRet, 4) + ' × ' + fmtBRLsimple(comRet)
+    : '—';
+
+  document.getElementById('das-total').textContent     = fmtBRLsimple(dasTotal);
+  document.getElementById('das-total-sub').textContent =
+    'receita total ' + fmtBRLsimple(semRet + comRet);
+
+  /* Tabela de detalhamento */
+  const tbody = document.getElementById('das-tbl-body');
+  tbody.innerHTML = '';
+
+  const linhas = [];
+  if (semRet > 0) linhas.push({ label: 'Sem ISS retido', valor: semRet, aliq: aliqSemRet, das: dasSemRet });
+  if (comRet > 0) linhas.push({ label: 'Com ISS retido', valor: comRet, aliq: aliqComRet, das: dasComRet });
+
+  linhas.forEach(l => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + l.label + '</td>' +
+      '<td>' + fmtBRLsimple(l.valor) + '</td>' +
+      '<td>' + fmtPct(l.aliq, 4) + '</td>' +
+      '<td>' + fmtBRLsimple(l.das) + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  if (semRet > 0 && comRet > 0) {
+    const trTot = document.createElement('tr');
+    trTot.className = 'row-total';
+    trTot.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtBRLsimple(semRet + comRet) + '</td>' +
+      '<td>—</td>' +
+      '<td>' + fmtBRLsimple(dasTotal) + '</td>';
+    tbody.appendChild(trTot);
+  }
+
+  document.getElementById('apuracao-result').style.display = 'block';
 }
 
 /* ── Enter para calcular ─────────────────────────────────────────── */
